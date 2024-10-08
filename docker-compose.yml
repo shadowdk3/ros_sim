@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  ros:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        USERNAME: ${USER}        # Pass the current host username
+        USER_UID: ${USER_UID}    # Pass the current user UID from the host
+        USER_GID: ${USER_GID}    # Pass the current user GID from the host
+    image: noetic_ros_sim
+    volumes:
+      - ./workspace:/workspace  # Bind mount the source directory for live development
+      - /tmp/.X11-unix:/tmp/.X11-unix  # Mount X11 socket
+      - $HOME/.Xauthority:/home/${USERNAME}/.Xauthority  # Mount X authority file
+    network_mode: "host"
+    ports:
+      - "11311:11311"         # Expose ROS master port if needed
+    tty: true                 # Keep the terminal open
+    environment:
+      USERNAME: ${USER}        # Pass the current username from the host environment
+      USER_UID: ${USER_UID}    # Pass the current user UID from the host
+      USER_GID: ${USER_GID}    # Pass the current user GID from the host
+      DISPLAY: $DISPLAY        # Forward display variable for X11
+      XAUTHORITY: /home/$USERNAME/.Xauthority  # Set XAUTHORITY for X11
+    user: "${USER_UID}:${USER_GID}" # Run the container with the current user (UID:GID)
+    command: bash  # Default command to start the container
